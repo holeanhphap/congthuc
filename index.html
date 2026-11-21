@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sổ Tay Công Thức Pha Chế - Barista SOP</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Phosphor Icons cho biểu tượng quầy bar sắc nét -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            cream: {
+              50: '#FDFBF7',
+              100: '#F7F2EA',
+              200: '#EFE5D5',
+              300: '#E2D1B8',
+            },
+            coffee: {
+              600: '#6F4E37',
+              700: '#5A3E2B',
+              800: '#432D1E',
+              900: '#2C1D13',
+            },
+            matcha: {
+              100: '#E8F0E5',
+              600: '#4A6B3E',
+              700: '#39542F',
+            },
+            caramel: {
+              500: '#C87D32',
+              600: '#B06822',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Ẩn thanh cuộn ngang nhưng vẫn cho phép vuốt mượt trên mobile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Hiệu ứng mờ nền modal */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+    .animate-slide-up {
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-cream-50 text-coffee-900 min-h-screen flex flex-col antialiased selection:bg-caramel-500 selection:text-white">
+
+  <!-- HEADER & THANH TÌM KIẾM CỐ ĐỊNH -->
+  <header class="sticky top-0 z-30 bg-cream-50/95 backdrop-blur-md border-b border-cream-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3">
+      <!-- Top Bar: Logo & Thống kê -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-coffee-800 text-cream-50 flex items-center justify-center shadow-md shrink-0">
+            <i class="ph-fill ph-coffee text-2xl text-caramel-500"></i>
+          </div>
+          <div>
+            <h1 class="font-display font-extrabold text-xl sm:text-2xl text-coffee-900 tracking-tight leading-none">
+              Barista SOP & Công Thức
+            </h1>
+            <p class="text-xs sm:text-sm text-coffee-600 mt-1 font-medium">
+              Hệ thống tra cứu chuẩn định lượng quầy pha chế
+            </p>
+          </div>
+        </div>
+
+        <!-- Bộ đếm kết quả & Nút xóa bộ lọc -->
+        <div class="flex items-center justify-between sm:justify-end gap-3">
+          <span id="recipeCountBadge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cream-200/80 text-coffee-800 text-xs font-semibold">
+            <i class="ph-bold ph-book-open"></i>
+            <span id="recipeCountText">Đang tải...</span>
+          </span>
+          <button id="resetFilterBtn" onclick="resetAllFilters()" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold transition-colors cursor-pointer">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i>
+            <span>Đặt lại</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Thanh tìm kiếm thông minh -->
+      <div class="relative max-w-3xl">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <i class="ph-bold ph-magnifying-glass text-coffee-600 text-lg"></i>
+        </div>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Tìm tên món (vd: bac xiu, ca phe muoi, matcha...) hoặc nguyên liệu (vd: rich, kem trung, khoai mon)..." 
+          class="w-full pl-11 pr-11 py-3 sm:py-3.5 bg-white border-2 border-cream-300 rounded-2xl text-sm sm:text-base text-coffee-900 placeholder-coffee-600/60 focus:outline-none focus:border-coffee-700 focus:ring-4 focus:ring-coffee-700/10 transition-all shadow-sm"
+          autocomplete="off"
+        >
+        <button 
+          id="clearSearchBtn" 
+          onclick="clearSearch()" 
+          class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-coffee-600 hover:text-coffee-900 cursor-pointer"
+          title="Xóa từ khóa"
+        >
+          <div class="w-7 h-7 rounded-full bg-cream-200 flex items-center justify-center">
+            <i class="ph-bold ph-x text-sm"></i>
+          </div>
+        </button>
+      </div>
+
+      <!-- Thanh lọc danh mục (Cuộn ngang mượt trên mobile) -->
+      <div class="mt-3.5 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div id="categoryTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          <!-- Các nút danh mục sẽ được render tự động bằng JS -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NỘI DUNG CHÍNH: LƯỚI THẺ CÔNG THỨC -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Trạng thái không tìm thấy -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-3xl border border-cream-200 shadow-sm">
+      <div class="w-16 h-16 rounded-2xl bg-cream-100 text-coffee-600 flex items-center justify-center mb-4">
+        <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
+      </div>
+      <h3 class="font-display font-bold text-lg text-coffee-900 mb-1">Không tìm thấy công thức phù hợp</h3>
+      <p class="text-sm text-coffee-600 max-w-md mb-5">
+        Thử tìm kiếm với từ khóa ngắn gọn hơn, không dấu hoặc chọn danh mục khác.
+      </p>
+      <button onclick="resetAllFilters()" class="px-5 py-2.5 rounded-xl bg-coffee-800 text-white font-semibold text-sm hover:bg-coffee-700 transition-colors shadow-sm cursor-pointer">
+        Xem tất cả công thức
+      </button>
+    </div>
+
+    <!-- Lưới hiển thị các món -->
+    <div id="recipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+      <!-- Cards được render tự động bởi JS -->
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-cream-100 border-t border-cream-200 py-5 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-coffee-600">
+      <p class="font-medium">Dữ liệu chuẩn hóa từ tài liệu <strong>CongThuc.docx</strong> (100% thông số định lượng gốc).</p>
+      <p>Mẹo: Nhấn <kbd class="px-1.5 py-0.5 bg-white border border-cream-300 rounded text-coffee-800 font-mono">/</kbd> để tìm nhanh • <kbd class="px-1.5 py-0.5 bg-white border border-cream-300 rounded text-coffee-800 font-mono">ESC</kbd> để đóng chi tiết</p>
+    </div>
+  </footer>
+
+  <!-- MODAL CHI TIẾT CÔNG THỨC -->
+  <div id="recipeModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div id="modalBackdrop" onclick="closeModal()" class="fixed inset-0 bg-coffee-900/60 backdrop-blur-xs animate-fade-in"></div>
+
+    <!-- Modal Container -->
+    <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4 text-center">
+      <div id="modalPanel" class="relative w-full max-w-2xl transform overflow-hidden rounded-t-3xl sm:rounded-3xl bg-cream-50 text-left align-middle shadow-2xl border border-cream-200 animate-slide-up max-h-[92vh] flex flex-col">
+        
+        <!-- Modal Header -->
+        <div class="bg-white px-5 sm:px-7 py-4 sm:py-5 border-b border-cream-200 flex items-start justify-between gap-4 shrink-0">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+              <span id="modalCategoryBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold">
+                Danh mục
+              </span>
+              <span id="modalSizeBadge" class="hidden items-center gap-1 px-2.5 py-0.5 rounded-lg bg-cream-100 text-coffee-800 text-xs font-semibold border border-cream-300">
+                <i class="ph-bold ph-cup"></i>
+                <span id="modalSizeText"></span>
+              </span>
+            </div>
+            <h2 id="modalTitle" class="font-display font-extrabold text-xl sm:text-2xl text-coffee-900 leading-snug">
+              Tên món
+            </h2>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="copyRecipeText()" id="copyBtn" class="p-2.5 rounded-xl bg-cream-100 hover:bg-cream-200 text-coffee-800 transition-colors cursor-pointer" title="Sao chép công thức">
+              <i class="ph-bold ph-copy text-lg"></i>
+            </button>
+            <button onclick="closeModal()" class="p-2.5 rounded-xl bg-cream-100 hover:bg-red-100 text-coffee-800 hover:text-red-700 transition-colors cursor-pointer" title="Đóng">
+              <i class="ph-bold ph-x text-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body (Cuộn độc lập) -->
+        <div class="px-5 sm:px-7 py-5 overflow-y-auto space-y-6">
+          
+          <!-- Bảng Nguyên liệu & Định lượng -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-display font-bold text-sm uppercase tracking-wider text-coffee-700 flex items-center gap-2">
+                <i class="ph-fill ph-scales text-caramel-500 text-base"></i>
+                Nguyên liệu & Định lượng
+              </h3>
+              <span id="modalIngCount" class="text-xs font-semibold text-coffee-600 bg-cream-200/70 px-2.5 py-0.5 rounded-full"></span>
+            </div>
+            
+            <div class="bg-white rounded-2xl border border-cream-200 overflow-hidden shadow-2xs">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-cream-100/80 border-b border-cream-200 text-xs font-bold text-coffee-700 uppercase">
+                    <th class="py-2.5 px-4">Nguyên liệu</th>
+                    <th class="py-2.5 px-4 text-right">Định lượng</th>
+                  </tr>
+                </thead>
+                <tbody id="modalIngredientsBody" class="divide-y divide-cream-100 text-sm">
+                  <!-- Rows render bằng JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cách làm từng bước -->
+          <div id="modalStepsSection">
+            <h3 class="font-display font-bold text-sm uppercase tracking-wider text-coffee-700 flex items-center gap-2 mb-3">
+              <i class="ph-fill ph-list-numbers text-coffee-700 text-base"></i>
+              Quy trình pha chế / Sơ chế
+            </h3>
+            <ol id="modalStepsList" class="space-y-2.5">
+              <!-- Steps render bằng JS -->
+            </ol>
+          </div>
+
+          <!-- Decor & Lưu ý (Grid 2 cột trên màn hình lớn nếu có cả hai) -->
+          <div id="modalExtrasGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <!-- Box Decor -->
+            <div id="modalDecorBox" class="hidden p-4 rounded-2xl bg-matcha-100/60 border border-matcha-600/20">
+              <div class="flex items-center gap-2 font-display font-bold text-xs uppercase tracking-wider text-matcha-700 mb-1.5">
+                <i class="ph-fill ph-sparkle text-base"></i>
+                Decor / Trình bày
+              </div>
+              <p id="modalDecorText" class="text-sm text-coffee-900 font-medium leading-relaxed"></p>
+            </div>
+
+            <!-- Box Lưu ý -->
+            <div id="modalNotesBox" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-300/60">
+              <div class="flex items-center gap-2 font-display font-bold text-xs uppercase tracking-wider text-amber-800 mb-1.5">
+                <i class="ph-fill ph-warning-circle text-base text-amber-600"></i>
+                Lưu ý quan trọng
+              </div>
+              <ul id="modalNotesList" class="text-sm text-amber-950 font-medium space-y-1 list-disc list-inside leading-relaxed"></ul>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="bg-white px-5 sm:px-7 py-3.5 border-t border-cream-200 flex items-center justify-between shrink-0">
+          <span id="copyToast" class="text-xs font-semibold text-matcha-700 opacity-0 transition-opacity flex items-center gap-1">
+            <i class="ph-bold ph-check-circle"></i> Đã sao chép công thức vào bộ nhớ tạm!
+          </span>
+          <button onclick="closeModal()" class="ml-auto px-5 py-2 rounded-xl bg-coffee-800 hover:bg-coffee-700 text-white font-semibold text-sm transition-colors cursor-pointer">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT DỮ LIỆU & LOGIC XỬ LÝ -->
+  <script>
+    // =========================================================================
+    // 1. CƠ SỞ DỮ LIỆU CÔNG THỨC ĐẦY ĐỦ TỪ CONGTHUC.DOCX (56 MÓN & VẬT TƯ)
+    // Đã được chuẩn hóa chính tả tiếng Việt rõ ràng, giữ nguyên 100% định lượng
+    // =========================================================================
+    const RECIPES_DATA = [
+      // --- I. CÀ PHÊ TRUYỀN THỐNG ---
+      {
+        id: "cf-tt-1",
+        category: "Cà phê truyền thống",
+        name: "Cà phê đen đá / sữa đá",
+        size: "Ly 150ml",
+        ingredients: [
+          { item: "Cà phê Phin", amount: "40ml" },
+          { item: "Sữa đặc / Đường", amount: "1 bowl sữa / 1 thẻ đường" }
+        ],
+        steps: [
+          "Cho cà phê phin vào ly.",
+          "Để riêng sữa đặc hoặc đường đi kèm với chén đá."
+        ],
+        decor: "1 chén đá, đi kèm sữa đặc hoặc đường.",
+        notes: []
+      },
+      {
+        id: "cf-tt-2",
+        category: "Cà phê truyền thống",
+        name: "Bạc xỉu",
+        size: "Ly 350ml",
+        ingredients: [
+          { item: "Cà phê Phin", amount: "30ml" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "30ml" },
+          { item: "Rich", amount: "10ml" }
+        ],
+        steps: [
+          "Cho lần lượt sữa tươi, sữa đặc, Rich đổ vào ly và khuấy đều.",
+          "Cho đá vào vừa ngang mặt sữa.",
+          "Đánh bọt cà phê bằng máy rồi rót lên trên cùng."
+        ],
+        decor: "",
+        notes: [
+          "Khi khách muốn làm nóng: đong nguyên liệu vào ca đong, đánh nóng đến 60 độ."
+        ]
+      },
+      {
+        id: "cf-tt-3",
+        category: "Cà phê truyền thống",
+        name: "Cà phê đen Sài Gòn / Sữa Sài Gòn",
+        size: "Ly 350ml",
+        ingredients: [
+          { item: "Cà phê Phin", amount: "60ml" },
+          { item: "Sữa đặc / Đường", amount: "20ml / 20ml" }
+        ],
+        steps: [
+          "Đong nguyên liệu vào bình shaker, cho đá vào lắc tạo bọt rồi đổ ra ly."
+        ],
+        decor: "",
+        notes: [
+          "Lắc tạo bọt dày để tránh bọt bị tan nhanh."
+        ]
+      },
+      {
+        id: "cf-tt-4",
+        category: "Cà phê truyền thống",
+        name: "Cà phê muối",
+        size: "Ly 250ml",
+        ingredients: [
+          { item: "Cà phê", amount: "30ml" },
+          { item: "Kem muối", amount: "40ml" },
+          { item: "Sữa đặc", amount: "20ml" }
+        ],
+        steps: [
+          "Đong các hỗn hợp vào ly theo đúng thứ tự để tách tầng: 20ml sữa đặc -> 30ml cà phê phin -> 2 muỗng nâu kem muối (40ml)."
+        ],
+        decor: "Rắc bột cacao lên bề mặt.",
+        notes: [
+          "Bỏ chén đá riêng đi kèm."
+        ]
+      },
+      {
+        id: "cf-tt-5",
+        category: "Cà phê truyền thống",
+        name: "Cà phê kem trứng",
+        size: "Ly 250ml",
+        ingredients: [
+          { item: "Cà phê", amount: "30ml" },
+          { item: "Kem trứng", amount: "40ml" },
+          { item: "Sữa đặc", amount: "20ml" }
+        ],
+        steps: [
+          "Đong các hỗn hợp vào ly theo đúng thứ tự để tách tầng: 20ml sữa đặc -> 30ml cà phê phin -> 2 muỗng nâu kem trứng (40ml)."
+        ],
+        decor: "Rắc bột cacao lên bề mặt.",
+        notes: [
+          "Bỏ chén đá riêng đi kèm."
+        ]
+      },
+      {
+        id: "cf-tt-6",
+        category: "Cà phê truyền thống",
+        name: "Cà phê hạt dẻ jelly",
+        size: "",
+        ingredients: [
+          { item: "Cà phê phin", amount: "30ml" },
+          { item: "Syrup hạt dẻ", amount: "20ml" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Rich", amount: "10ml" }
+        ],
+        steps: [
+          "Khuấy đều đường + syrup hạt dẻ + sữa tươi vào ly.",
+          "Thêm đá vào 2/3 ly.",
+          "Đánh bông cà phê ở trong một ca đong khác.",
+          "Rót thêm cà phê đã đánh bông vào ly.",
+          "Cho thạch jelly lên trên cùng."
+        ],
+        decor: "Thạch jelly.",
+        notes: [
+          "Thức uống thành phẩm phải đảm bảo phân tầng rõ rệt."
+        ]
+      },
+
+      // --- II. CÀ PHÊ PHA MÁY ---
+      {
+        id: "cf-pm-7",
+        category: "Cà phê pha máy",
+        name: "Espresso",
+        size: "17gr / 34ml",
+        ingredients: [
+          { item: "Cà phê Espresso", amount: "17gr / 34ml" },
+          { item: "Sữa đặc / Đường", amount: "1 bowl sữa / 1 thẻ đường" }
+        ],
+        steps: [
+          "Kiểm tra vệ sinh dụng cụ và ly đựng.",
+          "Lấy bột cà phê vào tay pha (17gr).",
+          "Nén cà phê với lực nén 5 - 10kg.",
+          "Xả nước nóng ở đầu group máy pha 2 - 3 giây.",
+          "Lắp tay pha vào máy và tiến hành chiết xuất (34ml)."
+        ],
+        decor: "Đi kèm 1 bowl sữa hoặc 1 thẻ đường.",
+        notes: []
+      },
+      {
+        id: "cf-pm-8",
+        category: "Cà phê pha máy",
+        name: "Latte (Đá)",
+        size: "Ly 350ml",
+        ingredients: [
+          { item: "Cà phê Espresso", amount: "1 shot" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Sữa thanh trùng", amount: "150ml" }
+        ],
+        steps: [
+          "Cho sữa thanh trùng vào ca đánh nóng đến 60 độ.",
+          "Cho tiếp sữa đặc, Rich, đường vào ly và khuấy đều.",
+          "Thêm đá vào ly.",
+          "Chiết xuất 1 shot Espresso rót lên trên."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "cf-pm-9",
+        category: "Cà phê pha máy",
+        name: "Latte (Nóng)",
+        size: "Ly nóng",
+        ingredients: [
+          { item: "Cà phê Espresso", amount: "1 shot" },
+          { item: "Sữa thanh trùng", amount: "200ml" }
+        ],
+        steps: [
+          "Chiết xuất 1 shot Espresso ra ly.",
+          "Đánh sữa tạo bọt foam mỏng đến nhiệt độ 55 - 60 độ.",
+          "Đổ sữa vào ly Espresso và tạo hình Latte Art."
+        ],
+        decor: "Đi kèm với 1 thẻ đường.",
+        notes: []
+      },
+      {
+        id: "cf-pm-10",
+        category: "Cà phê pha máy",
+        name: "Cappuccino (Đá)",
+        size: "Ly 350ml",
+        ingredients: [
+          { item: "Cà phê Espresso", amount: "1 shot" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Sữa thanh trùng", amount: "120ml" }
+        ],
+        steps: [
+          "Đánh sữa tạo foam dày đến nhiệt độ 40 - 50 độ.",
+          "Cho tiếp sữa đặc, Rich, đường vào ly khuấy đều.",
+          "Thêm đá vào ly.",
+          "Chiết xuất Espresso rót vào ly."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "cf-pm-11",
+        category: "Cà phê pha máy",
+        name: "Cappuccino (Nóng)",
+        size: "Ly nóng",
+        ingredients: [
+          { item: "Cà phê Espresso", amount: "1 shot" },
+          { item: "Sữa thanh trùng", amount: "200ml" }
+        ],
+        steps: [
+          "Chiết xuất 1 shot Espresso ra ly.",
+          "Đánh sữa tạo foam dày đến nhiệt độ 55 - 60 độ.",
+          "Rót sữa tạo hình Art."
+        ],
+        decor: "Đi kèm với 1 thẻ đường.",
+        notes: []
+      },
+
+      // --- III. TRÀ SỮA ---
+      {
+        id: "ts-1",
+        category: "Trà sữa",
+        name: "Sữa tươi trân châu đường đen",
+        size: "",
+        ingredients: [
+          { item: "Sữa thanh trùng", amount: "150ml" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Trân châu đen", amount: "1 vá" },
+          { item: "Syrup đường đen", amount: "10ml" },
+          { item: "Đường nước", amount: "10ml" }
+        ],
+        steps: [
+          "Cho trân châu đen và syrup đường đen vào ly, xoay đều tạo vết loang quanh thành ly.",
+          "Thêm đá đầy ly.",
+          "Khuấy đều sữa tươi, đường nước và Rich sau đó rót nhẹ vào ly."
+        ],
+        decor: "Vết loang đường đen quanh thành ly.",
+        notes: []
+      },
+      {
+        id: "ts-2",
+        category: "Trà sữa",
+        name: "Trà sữa Hong Kong phô mai tươi",
+        size: "",
+        ingredients: [
+          { item: "Trà sữa", amount: "150ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Khúc bạch", amount: "3 viên" },
+          { item: "Trân châu đen", amount: "1 muỗng" }
+        ],
+        steps: [
+          "Khuấy đều trà sữa và đường nước với đá.",
+          "Cho ra ly và thêm topping trân châu đen, khúc bạch viên lên trên."
+        ],
+        decor: "Trân châu đen, Khúc bạch viên (3 viên).",
+        notes: []
+      },
+      {
+        id: "ts-3",
+        category: "Trà sữa",
+        name: "Trà sữa Bá Vương",
+        size: "",
+        ingredients: [
+          { item: "Trà sữa", amount: "150ml" },
+          { item: "Đường nước", amount: "20ml" },
+          { item: "Thạch đào cắt lát vuông", amount: "1 vá" },
+          { item: "Trân châu đen", amount: "1 muỗng" }
+        ],
+        steps: [
+          "Khuấy đều trà sữa và đường nước với đá.",
+          "Cho ra ly và thêm topping trân châu đen, thạch đào cắt lát vuông."
+        ],
+        decor: "Trân châu đen, thạch đào.",
+        notes: []
+      },
+      {
+        id: "ts-4",
+        category: "Trà sữa",
+        name: "Trà sữa đường đen kem cheese",
+        size: "",
+        ingredients: [
+          { item: "Trà sữa", amount: "150ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Syrup đường đen", amount: "10ml" },
+          { item: "Kem muối", amount: "40ml" }
+        ],
+        steps: [
+          "Cho trân châu và syrup đường đen vào ly, tạo vết loang quanh thành ly.",
+          "Thêm đá đầy ly và rót hỗn hợp trà sữa đã khuấy đường vào.",
+          "Rót lớp kem muối (40ml) phủ lên trên bề mặt."
+        ],
+        decor: "Trân châu đen 1 vá.",
+        notes: []
+      },
+      {
+        id: "ts-5",
+        category: "Trà sữa",
+        name: "Trà sữa gạo rang",
+        size: "",
+        ingredients: [
+          { item: "Trà gạo rang", amount: "120ml" },
+          { item: "Bột béo", amount: "25gr" },
+          { item: "Sữa đặc", amount: "15ml" },
+          { item: "Đường", amount: "25ml" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào ca đong đánh nóng lên bằng vòi đánh sữa (lưu ý đánh tan bột, không đánh quá nóng).",
+          "Thêm đá vào ly.",
+          "Lắc tạo bọt với đá nhỏ, lược đá cho vào ly."
+        ],
+        decor: "Trân châu đen.",
+        notes: [
+          "Lưu ý đánh tan hoàn toàn bột béo nhưng không để nhiệt độ quá nóng."
+        ]
+      },
+      {
+        id: "ts-6",
+        category: "Trà sữa",
+        name: "Trà sữa khoai môn",
+        size: "",
+        ingredients: [
+          { item: "Hồng trà", amount: "120ml" },
+          { item: "Đường nước", amount: "25ml" },
+          { item: "Bột sữa", amount: "25g" },
+          { item: "Bột khoai môn", amount: "2 muỗng" },
+          { item: "Thạch đào cắt lát vuông", amount: "1 vá" },
+          { item: "Khúc bạch", amount: "2 viên" },
+          { item: "Trân châu", amount: "1 vá" },
+          { item: "Sốt khoai môn", amount: "10ml + 20ml" }
+        ],
+        steps: [
+          "Cho hồng trà, đường nước, bột sữa, bột khoai môn vào ca sục nóng cho tan đều.",
+          "Phết 10ml sốt khoai môn quanh thành ly.",
+          "Thêm lần lượt trân châu, thạch đào, khúc bạch vào ly.",
+          "Thêm đá vào ly rồi rót hỗn hợp trà sữa khoai môn trên vào.",
+          "Thêm 20ml sốt khoai môn lên mặt ly."
+        ],
+        decor: "10ml sốt viền thành ly + 20ml sốt phủ mặt ly.",
+        notes: []
+      },
+      {
+        id: "ts-7",
+        category: "Trà sữa",
+        name: "Sữa tươi khoai môn",
+        size: "",
+        ingredients: [
+          { item: "Sữa thanh trùng", amount: "150ml" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Trân châu đen", amount: "1 vá" },
+          { item: "Đường nước", amount: "10ml" },
+          { item: "Sốt khoai môn", amount: "10ml + 20ml" }
+        ],
+        steps: [
+          "Cho trân châu đen và 10ml sốt khoai môn vào ly, tạo vết loang quanh thành ly.",
+          "Thêm đá đầy ly.",
+          "Khuấy đều sữa tươi, đường nước và Rich sau đó rót nhẹ vào ly.",
+          "Thêm 20ml sốt khoai môn lên mặt ly."
+        ],
+        decor: "Vết loang sốt khoai môn + 20ml sốt phủ mặt.",
+        notes: []
+      },
+      {
+        id: "ts-8",
+        category: "Trà sữa",
+        name: "Trà sữa kem trứng nướng",
+        size: "",
+        ingredients: [
+          { item: "Trà sữa", amount: "150ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Kem trứng", amount: "40ml" },
+          { item: "Topping", amount: "Full" }
+        ],
+        steps: [
+          "Khuấy đều trà sữa và đường nước.",
+          "Cho topping vào ly, thêm đá đầy ly và rót trà sữa vào.",
+          "Phủ 40ml kem trứng lên trên bề mặt (có thể rắc đường khò lửa tạo lớp nướng)."
+        ],
+        decor: "Full topping & lớp kem trứng nướng bề mặt.",
+        notes: []
+      },
+
+      // --- IV. MATCHA & CHOCOLATE ---
+      {
+        id: "mc-1",
+        category: "Matcha & Chocolate",
+        name: "Matcha Latte",
+        size: "Ly 350ml",
+        ingredients: [
+          { item: "Bột Matcha + Nước sôi (85-90 độ)", amount: "3g + 30ml" },
+          { item: "Đường", amount: "15ml" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Sữa thanh trùng", amount: "70ml" },
+          { item: "Rich", amount: "10ml (theo quy trình)" }
+        ],
+        steps: [
+          "Rây bột matcha cho mịn sau đó khuấy tan đều với 30ml nước sôi (85-90 độ).",
+          "Cho hỗn hợp sữa đặc, Rich, đường, sữa tươi vào ly khuấy đều.",
+          "Thêm đá vào ly.",
+          "Rót nhẹ phần nước cốt matcha lên trên cùng."
+        ],
+        decor: "Phân tầng xanh matcha và trắng sữa.",
+        notes: []
+      },
+      {
+        id: "mc-2",
+        category: "Matcha & Chocolate",
+        name: "Matcha Xoài",
+        size: "",
+        ingredients: [
+          { item: "Bột Matcha + Nước sôi (85-90 độ)", amount: "3gr + 30ml nước sôi" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Mứt xoài Mama", amount: "40ml" },
+          { item: "Sữa tươi", amount: "70ml" }
+        ],
+        steps: [
+          "Rây bột matcha sau đó khuấy tan với 30ml nước sôi ở ngoài ca đong.",
+          "Cho 40ml mứt xoài vào dưới đáy ly.",
+          "Thêm đá vào ly.",
+          "Lấy ca đong khuấy đều hỗn hợp sữa tươi + đường + Rich, sau đó rót nhẹ vào ly.",
+          "Rót nhẹ phần matcha lên trên cùng."
+        ],
+        decor: "",
+        notes: [
+          "Thành phẩm phải phân 3 tầng rõ rệt (Vàng xoài - Trắng sữa - Xanh matcha)."
+        ]
+      },
+      {
+        id: "mc-3",
+        category: "Matcha & Chocolate",
+        name: "Choco muối",
+        size: "",
+        ingredients: [
+          { item: "Bột cacao + Nước sôi", amount: "5g + 50ml" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Sữa đặc", amount: "15ml" },
+          { item: "Kem muối", amount: "40ml" }
+        ],
+        steps: [
+          "Khuấy tan bột cacao với nước sôi ở ca đong.",
+          "Phết 10ml sốt choco quanh thành ly.",
+          "Thêm sữa đặc và Rich vào ca cacao khuấy đều.",
+          "Cho hỗn hợp đã khuấy vào ly, thêm đá đầy ly.",
+          "Rót phần kem muối (40ml) lên trên cùng."
+        ],
+        decor: "Rắc bột cacao lên lớp kem muối.",
+        notes: []
+      },
+      {
+        id: "mc-4",
+        category: "Matcha & Chocolate",
+        name: "Chocolate đá",
+        size: "",
+        ingredients: [
+          { item: "Bột cacao + Nước sôi", amount: "5g + 50ml" },
+          { item: "Rich", amount: "10ml" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "30ml" }
+        ],
+        steps: [
+          "Khuấy tan hỗn hợp sữa tươi, sữa đặc, Rich, đường vào ly.",
+          "Thêm đá đầy ly.",
+          "Khuấy tan bột cacao + nước sôi ở ca riêng.",
+          "Rót nhẹ phần cacao lên trên ly."
+        ],
+        decor: "Thành phẩm phân 2 tầng.",
+        notes: []
+      },
+      {
+        id: "mc-5",
+        category: "Matcha & Chocolate",
+        name: "Chocolate đá xay / Matcha đá xay",
+        size: "",
+        ingredients: [
+          { item: "Bột cacao / Bột matcha", amount: "1 muỗng đầy" },
+          { item: "Sữa đặc", amount: "40ml" },
+          { item: "Sữa tươi", amount: "40ml" },
+          { item: "Rich", amount: "20ml" },
+          { item: "Bột Frappe (Frap)", amount: "1 muỗng" },
+          { item: "Kem xịt (Whipping)", amount: "Phủ bề mặt" }
+        ],
+        steps: [
+          "Cho hỗn hợp lần lượt gồm sữa tươi, Rich, sữa đặc, bột cacao/matcha, bột Frap vào cối máy xay, thêm 1 ly đá.",
+          "Xay nhuyễn mịn trong 60 giây.",
+          "Đổ ra ly và trang trí."
+        ],
+        decor: "Xịt kem tươi bằng bình xịt kem trên bề mặt ly.",
+        notes: []
+      },
+
+      // --- V. TEA ---
+      {
+        id: "tea-1",
+        category: "Tea",
+        name: "Trà mãng cầu",
+        size: "",
+        ingredients: [
+          { item: "Trà xanh", amount: "100ml" },
+          { item: "Mứt mãng cầu tươi", amount: "50ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Tắc", amount: "1 quả" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào bình shaker.",
+          "Thêm đá và lắc đều nhẹ.",
+          "Đổ hỗn hợp ra ly."
+        ],
+        decor: "Thịt mãng cầu, lá dứa, lát chanh.",
+        notes: [
+          "Khi cho hỗn hợp ra ly cần để phần thịt mãng cầu nổi lên trên bề mặt."
+        ]
+      },
+      {
+        id: "tea-2",
+        category: "Tea",
+        name: "Hồng đào cam sả",
+        size: "Ly 500ml",
+        ingredients: [
+          { item: "Hồng trà", amount: "100ml" },
+          { item: "Sốt sả", amount: "10ml" },
+          { item: "Syrup đào", amount: "20ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Cốt chanh", amount: "10ml" }
+        ],
+        steps: [
+          "Cho tất cả hỗn hợp vào bình shaker.",
+          "Thêm đá và lắc đều, sau đó rót ra ly."
+        ],
+        decor: "3 lát đào, sả cắt mỏng, lát chanh, lá dứa.",
+        notes: [
+          "Sốt sả chia ra đủ dùng trong ca (bảo quản mát).",
+          "Công thức sốt sả: 50gr sả + 150ml nước lọc (xay nhuyễn lọc lấy nước cốt)."
+        ]
+      },
+      {
+        id: "tea-3",
+        category: "Tea",
+        name: "Trà ổi hồng kim quất",
+        size: "",
+        ingredients: [
+          { item: "Hồng trà", amount: "100ml" },
+          { item: "Syrup ổi", amount: "10ml" },
+          { item: "Mứt tắc xí muội", amount: "1/2 muỗng đen" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Tắc", amount: "2 quả" },
+          { item: "Mứt ổi", amount: "20ml" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào bình shaker.",
+          "Thêm đá và lắc đều, đổ ra ly."
+        ],
+        decor: "3 lát ổi hồng, lát chanh, lá dứa.",
+        notes: []
+      },
+      {
+        id: "tea-4",
+        category: "Tea",
+        name: "Trà thạch đào",
+        size: "",
+        ingredients: [
+          { item: "Trà đào Cozy", amount: "100ml" },
+          { item: "Rich", amount: "40ml" },
+          { item: "Đường", amount: "40ml" }
+        ],
+        steps: [
+          "Chia 100ml trà đào thành 2 phần bằng nhau (mỗi phần 50ml).",
+          "Thành phần 1: Cho vào ly 50ml trà đào + 40ml đường, khuấy đều rồi thêm đá.",
+          "Thành phần 2: Khuấy đều 50ml trà đào + 40ml Rich ở ngoài ca đong, sau đó rót nhẹ lên trên ly."
+        ],
+        decor: "3 lát đào lon, thạch đào cắt sợi.",
+        notes: []
+      },
+      {
+        id: "tea-5",
+        category: "Tea",
+        name: "Hồng trà vải Bắc Giang",
+        size: "",
+        ingredients: [
+          { item: "Hồng trà", amount: "70ml" },
+          { item: "Nước lọc", amount: "30ml" },
+          { item: "Mứt vải Boduo", amount: "20ml" },
+          { item: "Syrup vải Torani", amount: "20ml" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Chanh", amount: "10ml" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào bình shaker.",
+          "Thêm đá và lắc đều, đổ ra ly."
+        ],
+        decor: "2 quả vải lon, lát chanh, lá dứa.",
+        notes: []
+      },
+      {
+        id: "tea-6",
+        category: "Tea",
+        name: "Trà trái cây",
+        size: "",
+        ingredients: [
+          { item: "Trà xanh", amount: "100ml" },
+          { item: "Mứt trái cây", amount: "20ml" },
+          { item: "Mứt chanh dây", amount: "10ml" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Tắc", amount: "1 quả" },
+          { item: "Nước trái cây dầm", amount: "1 muỗng" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào bình shaker với đá.",
+          "Lắc đều và rót ra ly, trang trí trái cây tươi."
+        ],
+        decor: "Trái cây dầm, lát chanh, lá dứa.",
+        notes: []
+      },
+
+      // --- VI. YOGURT & SINH TỐ ---
+      {
+        id: "yog-1",
+        category: "Yogurt",
+        name: "Sữa chua đá",
+        size: "",
+        ingredients: [
+          { item: "Sữa chua", amount: "1 hộp" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Sữa tươi", amount: "30ml" },
+          { item: "Chanh", amount: "15ml" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào bình shaker.",
+          "Thêm đá.",
+          "Lắc đều sau đó cho ra ly."
+        ],
+        decor: "Nha đam, lá dứa, lát chanh.",
+        notes: []
+      },
+      {
+        id: "yog-2",
+        category: "Yogurt",
+        name: "Sữa chua trái cây nhiệt đới",
+        size: "",
+        ingredients: [
+          { item: "Sữa chua", amount: "1 hộp" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Sữa tươi", amount: "30ml" },
+          { item: "Chanh", amount: "10ml" },
+          { item: "Mứt trái cây", amount: "30ml" }
+        ],
+        steps: [
+          "Lắc đều hỗn hợp với đá trong shaker sau đó cho ra ly."
+        ],
+        decor: "Trái cây các loại (xoài, dâu, dưa hấu...), lá dứa, cam vàng.",
+        notes: []
+      },
+      {
+        id: "yog-3",
+        category: "Yogurt",
+        name: "Sữa chua xoài",
+        size: "",
+        ingredients: [
+          { item: "Sữa chua", amount: "1 hộp" },
+          { item: "Sữa tươi", amount: "30ml" },
+          { item: "Mứt xoài Mama", amount: "30ml" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Chanh", amount: "10ml" }
+        ],
+        steps: [
+          "Phết 10ml mứt xoài vào thành ly.",
+          "Cho hỗn hợp sữa chua + 20ml mứt xoài, sữa tươi, sữa đặc và chanh vào shaker lắc đều với đá.",
+          "Cho hỗn hợp đã lắc vào ly."
+        ],
+        decor: "Xoài cắt hạt lựu, lá dứa.",
+        notes: []
+      },
+      {
+        id: "yog-4",
+        category: "Yogurt",
+        name: "Sữa chua mít",
+        size: "",
+        ingredients: [
+          { item: "Sữa chua", amount: "1 hộp" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Sữa tươi", amount: "30ml" },
+          { item: "Mít tươi cắt sợi", amount: "30g" },
+          { item: "Chanh", amount: "15ml" }
+        ],
+        steps: [
+          "Lắc đều hỗn hợp sữa chua, sữa đặc, sữa tươi, chanh với đá sau đó cho vào ly.",
+          "Xếp mít tươi cắt sợi lên trên."
+        ],
+        decor: "Mít tươi cắt sợi (30g), lát chanh, lá dứa.",
+        notes: []
+      },
+      {
+        id: "yog-5",
+        category: "Yogurt",
+        name: "Sữa chua dâu tây",
+        size: "",
+        ingredients: [
+          { item: "Sữa chua", amount: "1 hộp" },
+          { item: "Mứt dâu", amount: "30ml (chia 20ml và 10ml)" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Sữa tươi", amount: "30ml" },
+          { item: "Chanh", amount: "10ml" }
+        ],
+        steps: [
+          "Cho 10ml mứt dâu phết vào thành ly.",
+          "Lắc đều tất cả hỗn hợp còn lại (bao gồm 20ml mứt dâu) với đá rồi đổ ra ly."
+        ],
+        decor: "Dâu tây cắt lát, lát chanh, lá dứa.",
+        notes: []
+      },
+      {
+        id: "yog-6",
+        category: "Yogurt",
+        name: "Sữa chua chanh dây",
+        size: "",
+        ingredients: [
+          { item: "Sữa chua", amount: "1 hộp" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Sữa tươi", amount: "30ml" },
+          { item: "Cốt chanh dây", amount: "30ml" }
+        ],
+        steps: [
+          "Cho 10ml sốt/cốt chanh dây vào ly, xoay tạo vết loang.",
+          "Cho hỗn hợp còn lại vào shaker lắc đều với đá rồi rót ra ly."
+        ],
+        decor: "Hạt đác, lá dứa, lát chanh.",
+        notes: []
+      },
+      {
+        id: "yog-7",
+        category: "Yogurt",
+        name: "Sinh tố bơ",
+        size: "",
+        ingredients: [
+          { item: "Bơ tươi", amount: "130 - 150g" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "30ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Đá", amount: "2/3 ly" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào cối xay nhuyễn mịn rồi rót ra ly."
+        ],
+        decor: "Dừa khô.",
+        notes: []
+      },
+      {
+        id: "yog-8",
+        category: "Yogurt",
+        name: "Sinh tố dâu",
+        size: "",
+        ingredients: [
+          { item: "Dâu tươi", amount: "2 quả" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Mứt dâu", amount: "30ml" },
+          { item: "Tắc", amount: "2 trái" },
+          { item: "Bột đá xay", amount: "1 muỗng nâu" },
+          { item: "Đá", amount: "2/3 ly" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào cối và xay nhuyễn mịn."
+        ],
+        decor: "Dâu tây, lá dứa, dừa khô.",
+        notes: []
+      },
+      {
+        id: "yog-9",
+        category: "Yogurt",
+        name: "Sinh tố xoài",
+        size: "",
+        ingredients: [
+          { item: "Xoài chín", amount: "1 miếng" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Đường", amount: "20ml" },
+          { item: "Mứt xoài", amount: "30ml" },
+          { item: "Tắc", amount: "2 quả" },
+          { item: "Bột đá xay", amount: "1 muỗng nâu" },
+          { item: "Đá", amount: "2/3 ly" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào cối và xay nhuyễn mịn."
+        ],
+        decor: "Xoài tươi, lá dứa.",
+        notes: []
+      },
+      {
+        id: "yog-10",
+        category: "Yogurt",
+        name: "Sinh tố mãng cầu",
+        size: "",
+        ingredients: [
+          { item: "Mứt mãng cầu", amount: "50ml" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "20ml" },
+          { item: "Tắc", amount: "2 quả" },
+          { item: "Bột đá xay", amount: "1 muỗng nâu" },
+          { item: "Đá", amount: "2/3 ly" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào cối và xay nhuyễn mịn."
+        ],
+        decor: "Lá dứa, lát chanh.",
+        notes: []
+      },
+
+      // --- VII. NƯỚC ÉP ---
+      {
+        id: "ep-1",
+        category: "Nước ép",
+        name: "Chanh xí muội",
+        size: "",
+        ingredients: [
+          { item: "Ô mai", amount: "1 quả" },
+          { item: "Nước sôi", amount: "30ml" },
+          { item: "Cốt chanh", amount: "20ml" },
+          { item: "Đường", amount: "30ml" },
+          { item: "Mứt tắc Thanh Bình", amount: "20ml" },
+          { item: "Nước lọc", amount: "100ml" }
+        ],
+        steps: [
+          "Dầm 1 trái ô mai với 30ml nước sôi cho ra vị.",
+          "Cho các nguyên liệu còn lại vào bình shaker.",
+          "Thêm đá.",
+          "Lắc đều hỗn hợp sau đó cho ra ly."
+        ],
+        decor: "Nha đam, lát chanh, lá dứa.",
+        notes: [
+          "Với đồ nóng: cho 120ml nước sôi, thêm vào ly lát chanh, ô mai, cam thảo."
+        ]
+      },
+      {
+        id: "ep-2",
+        category: "Nước ép",
+        name: "Ép cóc",
+        size: "",
+        ingredients: [
+          { item: "Nước ép cóc", amount: "200ml" },
+          { item: "Đường", amount: "35ml" },
+          { item: "Mứt tắc Thanh Bình", amount: "20ml" }
+        ],
+        steps: [
+          "Ép lấy 200ml nước cốt cóc tươi.",
+          "Lắc hoặc khuấy đều cùng 35ml đường và 20ml mứt tắc Thanh Bình với đá rồi rót ra ly."
+        ],
+        decor: "Lát cóc / lát chanh, lá dứa.",
+        notes: []
+      },
+
+      // --- VIII. HOT DRINKS ---
+      {
+        id: "hot-1",
+        category: "Hot Drinks",
+        name: "Trà gừng mật ong",
+        size: "Đồ nóng",
+        ingredients: [
+          { item: "Trà Cozy gừng", amount: "2 túi" },
+          { item: "Cam thảo", amount: "2 nhánh" },
+          { item: "Ô mai", amount: "1 viên" },
+          { item: "Gừng tươi", amount: "2 nhánh" },
+          { item: "Chanh lát", amount: "1 lát" },
+          { item: "Cam lát", amount: "1 lát" },
+          { item: "Mật ong", amount: "1 bowl" },
+          { item: "Muối", amount: "1gr" }
+        ],
+        steps: [
+          "Dầm gừng tươi vào ly.",
+          "Cho 2 túi trà Cozy gừng vào ly, thêm nước sôi gần đầy ly để ủ trà."
+        ],
+        decor: "Các nguyên liệu còn lại (cam thảo, ô mai, chanh lát, cam lát) bày vào đĩa riêng; 1 bowl mật ong đi kèm.",
+        notes: []
+      },
+      {
+        id: "hot-2",
+        category: "Hot Drinks",
+        name: "Trà cam quế mật ong",
+        size: "Đồ nóng",
+        ingredients: [
+          { item: "Trà đen", amount: "100ml" },
+          { item: "Nước cam", amount: "50ml" },
+          { item: "Mật ong", amount: "1 bowl" },
+          { item: "Quế thanh", amount: "1 thanh" }
+        ],
+        steps: [
+          "Sục nóng trà đen + quế thanh bằng vòi đánh sữa, sau đó cho ra ly.",
+          "Thêm 50ml nước cam ép vào khuấy nhẹ."
+        ],
+        decor: "Cam khô, thanh quế, đi kèm 1 bowl mật ong.",
+        notes: []
+      },
+
+      // --- IX. SIGNATURE ---
+      {
+        id: "sig-1",
+        category: "Signature",
+        name: "Mè Mè Latte",
+        size: "",
+        ingredients: [
+          { item: "Sốt nướng", amount: "20ml" },
+          { item: "Espresso", amount: "1 ly (30ml)" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Kem mè đen", amount: "40gr kem sữa + 5gr mè đen" }
+        ],
+        steps: [
+          "Khuấy đều sữa đặc, sốt nướng, 50ml sữa tươi rồi rót nhẹ vào ly.",
+          "Thêm đá vào ly.",
+          "Rót nhẹ 30ml Espresso vào ly.",
+          "Thêm lớp kem mè đen lên trên cùng."
+        ],
+        decor: "Rắc hạt mè lên bề mặt.",
+        notes: []
+      },
+      {
+        id: "sig-2",
+        category: "Signature",
+        name: "Matcha kem mè đen",
+        size: "",
+        ingredients: [
+          { item: "Bột matcha + Nước sôi", amount: "3gr + 30ml nước sôi" },
+          { item: "Sữa tươi", amount: "50ml" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Đường", amount: "10ml" },
+          { item: "Kem mè đen", amount: "60gr kem sữa + 5gr mè đen" }
+        ],
+        steps: [
+          "Rây bột matcha sau đó khuấy tan với 30ml nước sôi.",
+          "Cho hỗn hợp sữa đặc, Rich (nếu có), đường, sữa tươi vào ly khuấy đều.",
+          "Thêm đá vào ly.",
+          "Rót nhẹ phần nước cốt matcha vào ly.",
+          "Cho phần kem mè đen lên trên cùng."
+        ],
+        decor: "Thành phẩm phân 3 tầng rõ rệt.",
+        notes: []
+      },
+
+      // --- X. MÓN NOEL ---
+      {
+        id: "noel-1",
+        category: "Món Noel",
+        name: "Mint Coffee",
+        size: "",
+        ingredients: [
+          { item: "Mứt dâu", amount: "30ml" },
+          { item: "Sữa tươi", amount: "60ml" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Bạc hà (Syrup)", amount: "15ml" },
+          { item: "Cà phê", amount: "30ml" }
+        ],
+        steps: [
+          "Cho 30ml mứt dâu vào đáy ly.",
+          "Hòa đều sữa tươi, sữa đặc và syrup bạc hà.",
+          "Thêm đá vào ly rồi đổ phần sữa tươi bạc hà vào.",
+          "Đánh bông cà phê và rót lên mặt ly."
+        ],
+        decor: "Phân tầng Đỏ (dâu) - Xanh bạc hà - Nâu cà phê.",
+        notes: []
+      },
+      {
+        id: "noel-2",
+        category: "Món Noel",
+        name: "Matcha dâu",
+        size: "",
+        ingredients: [
+          { item: "Mứt dâu", amount: "30ml" },
+          { item: "Sữa tươi", amount: "70ml" },
+          { item: "Sữa đặc", amount: "10ml" },
+          { item: "Matcha + Nước sôi", amount: "4g + 30ml" }
+        ],
+        steps: [
+          "Cho 30ml mứt dâu vào đáy ly.",
+          "Thêm đá vào ly.",
+          "Khuấy đều sữa tươi và sữa đặc rồi cho vào ly.",
+          "Khuấy đều bột matcha và nước sôi, sau đó rót nhẹ lên trên ly.",
+          "Xịt kem tươi và rắc bột matcha trang trí."
+        ],
+        decor: "Xịt kem tươi và rắc bột matcha lên trên.",
+        notes: []
+      },
+
+      // --- XI. VẬT TƯ / NGUYÊN LIỆU SƠ CHẾ ---
+      {
+        id: "vt-1",
+        category: "Vật tư",
+        name: "Kem muối (Mẻ lớn)",
+        size: "Sơ chế quầy",
+        ingredients: [
+          { item: "Rich", amount: "1 hộp (450ml)" },
+          { item: "Sữa đặc", amount: "30ml" },
+          { item: "Muối", amount: "5gr" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu vào ca đánh bằng máy đến khi kem đạt độ sệt vừa phải (khi nhấc máy đánh ra thì kem bông dựng chóp nhẹ).",
+          "Thể tích kem sau khi đánh đạt gấp đôi ban đầu."
+        ],
+        decor: "",
+        notes: [
+          "Các dụng cụ và nguyên liệu dùng để đánh kem phải đảm bảo giữ nhiệt độ lạnh."
+        ]
+      },
+      {
+        id: "vt-2",
+        category: "Vật tư",
+        name: "Kem trứng (Mẻ chuẩn)",
+        size: "Sơ chế quầy",
+        ingredients: [
+          { item: "Rich", amount: "100ml" },
+          { item: "Base", amount: "60ml" },
+          { item: "Muối", amount: "3gr" },
+          { item: "Sữa tươi", amount: "100ml" },
+          { item: "Bột kem trứng", amount: "60g" }
+        ],
+        steps: [
+          "Cho tất cả nguyên liệu (Rich, Base, muối, sữa tươi, bột kem trứng) vào ca lạnh.",
+          "Dùng máy đánh kem đánh bông mịn đến khi đạt độ sệt chuẩn."
+        ],
+        decor: "",
+        notes: [
+          "Bảo quản lạnh trong ca đậy kín."
+        ]
+      },
+      {
+        id: "vt-3",
+        category: "Vật tư",
+        name: "Nước đường",
+        size: "Sơ chế quầy",
+        ingredients: [
+          { item: "Nước sôi 100 độ", amount: "700ml" },
+          { item: "Đường cát", amount: "1kg" }
+        ],
+        steps: [
+          "Khuấy đều đường cát với 700ml nước sôi 100 độ đến khi đường tan hoàn toàn.",
+          "Sau khi nước đường nguội hẳn thì rót vào bình pump."
+        ],
+        decor: "",
+        notes: [
+          "Bảo quản ở nhiệt độ thường."
+        ]
+      },
+      {
+        id: "vt-4",
+        category: "Vật tư",
+        name: "Ủ cốt Trà xanh",
+        size: "1200ml",
+        ingredients: [
+          { item: "Nước lọc", amount: "1200ml" },
+          { item: "Trà xanh", amount: "35gr" },
+          { item: "Đá", amount: "200gr" }
+        ],
+        steps: [
+          "Cho nhẹ trà xanh vào nước lọc và đá, khuấy nhẹ.",
+          "Ủ lạnh trà trong vòng 5 - 8 tiếng.",
+          "Sau khi ủ đủ thời gian thì lọc bỏ xác trà."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-5",
+        category: "Vật tư",
+        name: "Ủ cốt Trà gạo",
+        size: "1000ml",
+        ingredients: [
+          { item: "Nước sôi", amount: "1000ml" },
+          { item: "Trà gạo", amount: "60gr" }
+        ],
+        steps: [
+          "Cho nhẹ trà gạo vào 1000ml nước sôi, khuấy nhẹ.",
+          "Đậy nắp và ủ trà trong vòng 10 phút.",
+          "Sau khi ủ đủ thời gian thì lọc bỏ xác trà."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-6",
+        category: "Vật tư",
+        name: "Ủ cốt Hồng trà",
+        size: "1200ml",
+        ingredients: [
+          { item: "Nước lọc", amount: "1200ml" },
+          { item: "Hồng trà", amount: "70gr" },
+          { item: "Đá", amount: "200g" }
+        ],
+        steps: [
+          "Cho hồng trà vào nước lọc thêm đá, khuấy nhẹ.",
+          "Đậy nắp và ủ trà trong vòng 5 - 8 tiếng, sau đó lọc bỏ xác trà."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-7",
+        category: "Vật tư",
+        name: "Cà phê phin đại",
+        size: "Chiết xuất lớn",
+        ingredients: [
+          { item: "Cà phê bột", amount: "200gr (200ml)" },
+          { item: "Nước sôi lần 1", amount: "250ml" },
+          { item: "Nước sôi lần 2", amount: "350ml" }
+        ],
+        steps: [
+          "Dùng cân đong cà phê bột cho vào phin đại, lắc nhẹ làm phẳng mặt cà phê.",
+          "Đổ 250ml nước sôi lần 1 vào phin, xới nhẹ để thấm đều cà phê, sau đó làm phẳng mặt, đặt vỉ gài không bị lệch và nén mạnh.",
+          "Sau 10 phút ủ nở, rót tiếp 350ml nước sôi lần 2 vào.",
+          "Sau khi chiết xuất hết cà phê, dùng rây lọc sang một ca đựng khác."
+        ],
+        decor: "",
+        notes: [
+          "Bảo quản cốt cà phê trong tủ mát khi không sử dụng."
+        ]
+      },
+      {
+        id: "vt-8",
+        category: "Vật tư",
+        name: "Thạch đào",
+        size: "1000ml",
+        ingredients: [
+          { item: "Nước sôi 100 độ", amount: "1000ml" },
+          { item: "Bột rau câu", amount: "1 gói" },
+          { item: "Syrup đào", amount: "50ml" },
+          { item: "Đường cát", amount: "70gr" },
+          { item: "Trà đào Cozy", amount: "150ml" }
+        ],
+        steps: [
+          "Trộn đều đường cát trắng và bột rau câu.",
+          "Cho hỗn hợp vừa trộn vào 1000ml nước sôi khuấy nhanh tay (tránh vón cục).",
+          "Cho tiếp syrup đào và trà đào Cozy vào khuấy đều.",
+          "Đổ ra khuôn để nguội rồi cho vào bảo quản tủ mát."
+        ],
+        decor: "",
+        notes: [
+          "Cách ngâm trà đào Cozy: 9 gói trà túi lọc + 820ml nước sôi."
+        ]
+      },
+      {
+        id: "vt-9",
+        category: "Vật tư",
+        name: "Nấu Trân châu đen",
+        size: "200gr khô",
+        ingredients: [
+          { item: "Trân châu đen", amount: "200gr" },
+          { item: "Nước sôi", amount: "2000ml" },
+          { item: "Thời gian nấu", amount: "30 phút" },
+          { item: "Thời gian ủ", amount: "30 phút" },
+          { item: "Sơ chế sau nấu", amount: "50gr đường + 50ml syrup đường đen" }
+        ],
+        steps: [
+          "Rây sàng lại trân châu đen khô để loại bỏ vụn.",
+          "Nấu nước sôi (lượng nước gấp 10 lần lượng trân châu - 2000ml).",
+          "Khi nước sôi sục, cho trân châu vào khuấy đều.",
+          "Tiếp tục để lửa lớn, cứ 5 phút khuấy đảo 1 lần, nấu trong vòng 30 phút.",
+          "Tắt bếp, đậy kín nắp ủ thêm 30 phút.",
+          "Đổ hết nước, dùng nước ấm rửa sạch nhớt trân châu.",
+          "Trộn liền với 50gr đường và 50ml syrup đường đen để trân châu bóng và không dính nhau."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-10",
+        category: "Vật tư",
+        name: "Khúc bạch",
+        size: "Mẻ khuôn",
+        ingredients: [
+          { item: "Sữa tươi", amount: "500ml" },
+          { item: "Phô mai Con Bò Cười", amount: "5 miếng" },
+          { item: "Bột gelatin", amount: "40g" },
+          { item: "Rich + Base", amount: "450ml + 50ml" },
+          { item: "Đường cát", amount: "150g" },
+          { item: "Bột rau câu", amount: "3gr" }
+        ],
+        steps: [
+          "Ngâm 40g bột gelatin với 150ml nước lọc cho nở.",
+          "Cho sữa tươi và 5 miếng phô mai vào cối xay nhuyễn.",
+          "Cho hỗn hợp kem (Rich + Base), đường cát, bột rau câu và gelatin đã ngâm vào nồi đun lửa vừa đến khi hỗn hợp ấm nóng lên, khuấy đều đến khi gelatin tan hết.",
+          "Cho tiếp hỗn hợp sữa phô mai vừa xay vào nồi, hạ nhiệt thấp, khuấy đều rồi tắt bếp.",
+          "Đổ ra khuôn làm nguội ở nhiệt độ thường rồi bảo quản tủ mát."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-11",
+        category: "Vật tư",
+        name: "Sốt khoai môn",
+        size: "Sơ chế quầy",
+        ingredients: [
+          { item: "Khoai dẻo", amount: "70g" },
+          { item: "Khoai môn", amount: "38g" },
+          { item: "Sữa tươi", amount: "100ml" },
+          { item: "Rich", amount: "150ml" },
+          { item: "Bột khoai môn", amount: "4 muỗng" },
+          { item: "Sữa đặc", amount: "25ml" }
+        ],
+        steps: [
+          "Cắt khoai môn và khoai dẻo thành lát nhỏ.",
+          "Hấp chín trong 30 phút với 1 lít nước.",
+          "Cho khoai đã chín vào máy xay cùng sữa tươi, Rich, bột khoai môn, sữa đặc và xay nhuyễn."
+        ],
+        decor: "",
+        notes: [
+          "Đảm bảo thành phẩm sốt ở dạng hơi lỏng để dễ tạo vân. Bảo quản tủ lạnh."
+        ]
+      },
+      {
+        id: "vt-12",
+        category: "Vật tư",
+        name: "Sốt chanh dây",
+        size: "3kg chanh",
+        ingredients: [
+          { item: "Chanh dây", amount: "3kg" },
+          { item: "Đường", amount: "500g" },
+          { item: "Nước nấu thêm", amount: "500g" }
+        ],
+        steps: [
+          "Cắt chanh dây và lọc lấy nước cốt, để lại phần hạt.",
+          "Cho phần hạt đã lọc vào máy xay và thêm nước với tỉ lệ 2 hạt chanh dây : 1 nước, xay lên.",
+          "Cho phần đã xay vào máy ép để ép lấy nước cốt.",
+          "Cho toàn bộ nước cốt vào nồi nấu lên ở mức 1000 độ, thêm 500g đường và 500g nước.",
+          "Nấu sôi trong 15 phút, sau đó hạ bếp xuống 500 độ nấu tiếp trong vòng 30 phút."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-13",
+        category: "Vật tư",
+        name: "Hạt đác rim",
+        size: "1 bì",
+        ingredients: [
+          { item: "Hạt đác", amount: "1 bì" },
+          { item: "Nước sôi", amount: "300ml" },
+          { item: "Đường cát", amount: "100g" },
+          { item: "Đường đen", amount: "3 muỗng" },
+          { item: "Thơm (Dứa)", amount: "2 miếng" }
+        ],
+        steps: [
+          "Cho hạt đác vào nồi trụng qua 300ml nước sôi rồi lọc ráo.",
+          "Cho 2 miếng thơm cắt lát nhỏ vào cùng hạt đác.",
+          "Thêm đường cát và đường đen vào đảo đều, ủ trong 5 phút.",
+          "Bật bếp nấu ở nhiệt độ 800 độ đến khi nước đường sệt lại thì hạ bếp, để nguội và cất tủ lạnh."
+        ],
+        decor: "",
+        notes: [
+          "Nếm thử trong quá trình nấu để kiểm tra độ mềm của hạt đát."
+        ]
+      },
+      {
+        id: "vt-14",
+        category: "Vật tư",
+        name: "Nấu cốt Trà sữa",
+        size: "2.4 lít",
+        ingredients: [
+          { item: "Nước sôi", amount: "2 lít 4 (2400ml)" },
+          { item: "Hồng trà", amount: "140g" },
+          { item: "Sữa đặc", amount: "150ml" },
+          { item: "Bột sữa", amount: "450g" }
+        ],
+        steps: [
+          "Ủ 140g hồng trà với 2 lít 4 nước sôi trong 12 phút.",
+          "Lọc bỏ xác trà và thêm 2 súc đá vào cốt trà.",
+          "Đặt lên bếp nấu sôi ở mức 1000 độ.",
+          "Thêm 450g bột kem sữa và 150ml sữa đặc vào khuấy đều.",
+          "Chờ hỗn hợp hòa tan hết thì tắt bếp."
+        ],
+        decor: "",
+        notes: []
+      },
+      {
+        id: "vt-15",
+        category: "Vật tư",
+        name: "Sốt sả",
+        size: "150ml",
+        ingredients: [
+          { item: "Sả tươi", amount: "50g" },
+          { item: "Nước lọc", amount: "150ml" }
+        ],
+        steps: [
+          "Sả cắt nhỏ cho vào máy xay cùng 150ml nước lọc.",
+          "Xay nhuyễn mịn.",
+          "Dùng rây/vải lọc để lọc lấy phần nước cốt sả."
+        ],
+        decor: "",
+        notes: [
+          "Bảo quản trong tủ lạnh, chia đủ dùng theo ca."
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 2. CẤU HÌNH DANH MỤC & MÀU SẮC NHẬN DIỆN
+    // =========================================================================
+    const CATEGORIES = [
+      { id: "Tất cả", label: "Tất cả", icon: "ph-squares-four", badgeClass: "bg-coffee-800 text-white" },
+      { id: "Cà phê truyền thống", label: "Cà phê truyền thống", icon: "ph-coffee", badgeClass: "bg-amber-100 text-amber-900 border border-amber-300/60" },
+      { id: "Cà phê pha máy", label: "Cà phê pha máy", icon: "ph-espresso", badgeClass: "bg-stone-200 text-stone-900 border border-stone-300" },
+      { id: "Trà sữa", label: "Trà sữa", icon: "ph-brandy", badgeClass: "bg-orange-100 text-orange-900 border border-orange-300/60" },
+      { id: "Matcha & Chocolate", label: "Matcha & Chocolate", icon: "ph-leaf", badgeClass: "bg-matcha-100 text-matcha-700 border border-matcha-600/30" },
+      { id: "Tea", label: "Tea (Trà trái cây)", icon: "ph-martini", badgeClass: "bg-rose-100 text-rose-900 border border-rose-300/60" },
+      { id: "Yogurt", label: "Yogurt & Sinh tố", icon: "ph-ice-cream", badgeClass: "bg-sky-100 text-sky-900 border border-sky-300/60" },
+      { id: "Nước ép", label: "Nước ép", icon: "ph-orange-slice", badgeClass: "bg-lime-100 text-lime-900 border border-lime-300/60" },
+      { id: "Hot Drinks", label: "Hot Drinks", icon: "ph-fire", badgeClass: "bg-red-100 text-red-900 border border-red-300/60" },
+      { id: "Signature", label: "Signature", icon: "ph-crown", badgeClass: "bg-purple-100 text-purple-900 border border-purple-300/60" },
+      { id: "Món Noel", label: "Món Noel", icon: "ph-snowflake", badgeClass: "bg-emerald-100 text-emerald-900 border border-emerald-300/60" },
+      { id: "Vật tư", label: "Vật tư / Sơ chế", icon: "ph-flask", badgeClass: "bg-slate-200 text-slate-800 border border-slate-300" }
+    ];
+
+    // Trạng thái ứng dụng
+    let activeCategory = "Tất cả";
+    let searchQuery = "";
+    let currentModalRecipe = null;
+
+    // =========================================================================
+    // 3. HÀM CHUẨN HÓA TIẾNG VIỆT KHÔNG DẤU ĐỂ TÌM KIẾM THÔNG MINH
+    // =========================================================================
+    function removeVietnameseTones(str) {
+      if (!str) return "";
+      return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase()
+        .trim();
+    }
+
+    // Tiền xử lý chuỗi tìm kiếm cho mỗi công thức để tối ưu tốc độ lọc
+    const INDEXED_RECIPES = RECIPES_DATA.map(recipe => {
+      const ingText = recipe.ingredients.map(i => `${i.item} ${i.amount}`).join(" ");
+      const searchableRaw = `${recipe.name} ${recipe.category} ${recipe.size} ${ingText} ${recipe.decor} ${recipe.notes.join(" ")}`.toLowerCase();
+      const searchableNoTone = removeVietnameseTones(searchableRaw);
+      const nameNoTone = removeVietnameseTones(recipe.name);
+      return {
+        ...recipe,
+        searchableRaw,
+        searchableNoTone,
+        nameNoTone
+      };
+    });
+
+    // =========================================================================
+    // 4. RENDER GIAO DIỆN DANH MỤC & LƯỚI CÔNG THỨC
+    // =========================================================================
+    function getCategoryMeta(catId) {
+      return CATEGORIES.find(c => c.id === catId) || CATEGORIES[0];
+    }
+
+    function renderCategoryTabs() {
+      const container = document.getElementById("categoryTabs");
+      container.innerHTML = CATEGORIES.map(cat => {
+        const count = cat.id === "Tất cả" 
+          ? RECIPES_DATA.length 
+          : RECIPES_DATA.filter(r => r.category === cat.id).length;
+        const isActive = activeCategory === cat.id;
+
+        return `
+          <button 
+            onclick="selectCategory('${cat.id}')"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+              isActive 
+                ? "bg-coffee-800 text-white shadow-sm ring-2 ring-coffee-800/20" 
+                : "bg-white text-coffee-700 hover:bg-cream-200/70 border border-cream-200"
+            }"
+          >
+            <i class="ph-bold ${cat.icon} ${isActive ? 'text-caramel-500' : 'text-coffee-600'}"></i>
+            <span>${cat.label}</span>
+            <span class="ml-0.5 px-1.5 py-0.2 rounded-md text-[11px] ${
+              isActive ? "bg-white/20 text-white" : "bg-cream-100 text-coffee-700"
+            }">${count}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderRecipes() {
+      const grid = document.getElementById("recipeGrid");
+      const emptyState = document.getElementById("emptyState");
+      const countText = document.getElementById("recipeCountText");
+      const resetBtn = document.getElementById("resetFilterBtn");
+
+      const queryRaw = searchQuery.toLowerCase().trim();
+      const queryNoTone = removeVietnameseTones(searchQuery);
+
+      // Lọc công thức
+      let filtered = INDEXED_RECIPES.filter(recipe => {
+        const matchCategory = activeCategory === "Tất cả" || recipe.category === activeCategory;
+        if (!matchCategory) return false;
+
+        if (!queryNoTone) return true;
+        return recipe.searchableRaw.includes(queryRaw) || recipe.searchableNoTone.includes(queryNoTone);
+      });
+
+      // Sắp xếp ưu tiên món có tên khớp trực tiếp với từ khóa tìm kiếm
+      if (queryNoTone) {
+        filtered.sort((a, b) => {
+          const aNameMatch = a.nameNoTone.includes(queryNoTone) ? 1 : 0;
+          const bNameMatch = b.nameNoTone.includes(queryNoTone) ? 1 : 0;
+          return bNameMatch - aNameMatch;
+        });
+      }
+
+      // Cập nhật bộ đếm & nút đặt lại
+      countText.textContent = `${filtered.length} / ${RECIPES_DATA.length} công thức`;
+      if (activeCategory !== "Tất cả" || queryNoTone !== "") {
+        resetBtn.classList.remove("hidden");
+        resetBtn.classList.add("inline-flex");
+      } else {
+        resetBtn.classList.add("hidden");
+        resetBtn.classList.remove("inline-flex");
+      }
+
+      // Hiển thị Empty State nếu không có kết quả
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        emptyState.classList.add("flex");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      emptyState.classList.remove("flex");
+
+      // Render các thẻ công thức
+      grid.innerHTML = filtered.map(recipe => {
+        const catMeta = getCategoryMeta(recipe.category);
+        // Lấy tối đa 3 nguyên liệu tiêu biểu để xem nhanh trên thẻ
+        const previewIngs = recipe.ingredients.slice(0, 3);
+        const remainingCount = recipe.ingredients.length - previewIngs.length;
+
+        return `
+          <article 
+            onclick="openModal('${recipe.id}')"
+            class="group bg-white rounded-2xl border border-cream-200 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-coffee-600/40 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between cursor-pointer"
+          >
+            <div>
+              <!-- Header thẻ: Danh mục & Dung tích -->
+              <div class="flex items-center justify-between gap-2 mb-2.5">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold ${catMeta.badgeClass}">
+                  <i class="ph-bold ${catMeta.icon}"></i>
+                  ${recipe.category}
+                </span>
+                ${recipe.size ? `
+                  <span class="text-[11px] font-semibold text-coffee-700 bg-cream-100 px-2 py-0.5 rounded-md border border-cream-200 shrink-0">
+                    ${recipe.size}
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Tên món -->
+              <h3 class="font-display font-bold text-base sm:text-lg text-coffee-900 group-hover:text-caramel-600 transition-colors leading-snug mb-3">
+                ${recipe.name}
+              </h3>
+
+              <!-- Tóm tắt nguyên liệu chính -->
+              <div class="space-y-1.5 mb-4">
+                ${previewIngs.map(ing => `
+                  <div class="flex items-center justify-between text-xs text-coffee-700 bg-cream-50/80 px-2.5 py-1.5 rounded-lg">
+                    <span class="truncate pr-2 font-medium">${ing.item}</span>
+                    <span class="font-bold text-coffee-900 shrink-0">${ing.amount}</span>
+                  </div>
+                `).join("")}
+                ${remainingCount > 0 ? `
+                  <p class="text-[11px] font-semibold text-coffee-600 pl-1 pt-0.5">
+                    + ${remainingCount} nguyên liệu khác...
+                  </p>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Footer thẻ -->
+            <div class="pt-3 border-t border-cream-100 flex items-center justify-between text-xs">
+              <span class="font-semibold text-coffee-600 flex items-center gap-1">
+                <i class="ph-bold ph-list-checks text-coffee-700"></i>
+                ${recipe.ingredients.length} thành phần
+              </span>
+              <span class="font-bold text-coffee-800 group-hover:text-caramel-600 inline-flex items-center gap-1 transition-colors">
+                Xem chi tiết
+                <i class="ph-bold ph-arrow-right group-hover:translate-x-0.5 transition-transform"></i>
+              </span>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // =========================================================================
+    // 5. XỬ LÝ TƯƠNG TÁC TÌM KIẾM & BỘ LỌC
+    // =========================================================================
+    function selectCategory(categoryId) {
+      activeCategory = categoryId;
+      renderCategoryTabs();
+      renderRecipes();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById("searchInput");
+      input.value = "";
+      searchQuery = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
+      renderRecipes();
+      input.focus();
+    }
+
+    function resetAllFilters() {
+      activeCategory = "Tất cả";
+      searchQuery = "";
+      const input = document.getElementById("searchInput");
+      input.value = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
+      renderCategoryTabs();
+      renderRecipes();
+    }
+
+    // =========================================================================
+    // 6. XỬ LÝ MODAL CHI TIẾT CÔNG THỨC & SAO CHÉP
+    // =========================================================================
+    function openModal(recipeId) {
+      const recipe = RECIPES_DATA.find(r => r.id === recipeId);
+      if (!recipe) return;
+
+      currentModalRecipe = recipe;
+      const catMeta = getCategoryMeta(recipe.category);
+
+      // Điền thông tin Header
+      const catBadge = document.getElementById("modalCategoryBadge");
+      catBadge.className = `inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold ${catMeta.badgeClass}`;
+      catBadge.innerHTML = `<i class="ph-bold ${catMeta.icon}"></i> ${recipe.category}`;
+
+      const sizeBadge = document.getElementById("modalSizeBadge");
+      if (recipe.size) {
+        document.getElementById("modalSizeText").textContent = recipe.size;
+        sizeBadge.classList.remove("hidden");
+        sizeBadge.classList.add("inline-flex");
+      } else {
+        sizeBadge.classList.add("hidden");
+        sizeBadge.classList.remove("inline-flex");
+      }
+
+      document.getElementById("modalTitle").textContent = recipe.name;
+
+      // Điền bảng Nguyên liệu
+      document.getElementById("modalIngCount").textContent = `${recipe.ingredients.length} nguyên liệu`;
+      document.getElementById("modalIngredientsBody").innerHTML = recipe.ingredients.map(ing => `
+        <tr class="hover:bg-cream-50/70 transition-colors">
+          <td class="py-2.5 px-4 font-medium text-coffee-900">${ing.item}</td>
+          <td class="py-2.5 px-4 text-right font-bold text-coffee-800 whitespace-nowrap">${ing.amount}</td>
+        </tr>
+      `).join("");
+
+      // Điền Cách làm từng bước
+      const stepsList = document.getElementById("modalStepsList");
+      stepsList.innerHTML = recipe.steps.map((step, idx) => `
+        <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-cream-200/80 shadow-2xs">
+          <span class="w-6 h-6 rounded-lg bg-coffee-800 text-cream-50 font-display font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+            ${idx + 1}
+          </span>
+          <span class="text-sm text-coffee-900 leading-relaxed font-medium">${step}</span>
+        </li>
+      `).join("");
+
+      // Điền Decor & Lưu ý
+      const decorBox = document.getElementById("modalDecorBox");
+      const notesBox = document.getElementById("modalNotesBox");
+      const extrasGrid = document.getElementById("modalExtrasGrid");
+
+      const hasDecor = recipe.decor && recipe.decor.trim() !== "";
+      const hasNotes = recipe.notes && recipe.notes.length > 0;
+
+      if (hasDecor) {
+        document.getElementById("modalDecorText").textContent = recipe.decor;
+        decorBox.classList.remove("hidden");
+      } else {
+        decorBox.classList.add("hidden");
+      }
+
+      if (hasNotes) {
+        document.getElementById("modalNotesList").innerHTML = recipe.notes.map(n => `<li>${n}</li>`).join("");
+        notesBox.classList.remove("hidden");
+      } else {
+        notesBox.classList.add("hidden");
+      }
+
+      // Căn chỉnh cột nếu chỉ có 1 trong 2 ô Decor hoặc Lưu ý
+      if (hasDecor && hasNotes) {
+        extrasGrid.className = "grid grid-cols-1 sm:grid-cols-2 gap-3.5";
+      } else if (hasDecor || hasNotes) {
+        extrasGrid.className = "grid grid-cols-1 gap-3.5";
+      } else {
+        extrasGrid.className = "hidden";
+      }
+
+      // Hiển thị Modal & khóa cuộn nền
+      document.getElementById("copyToast").classList.add("opacity-0");
+      document.getElementById("recipeModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      document.getElementById("recipeModal").classList.add("hidden");
+      document.body.style.overflow = "";
+      currentModalRecipe = null;
+    }
+
+    // Sao chép nhanh công thức ra clipboard (sử dụng textarea + execCommand tương thích iframe)
+    function copyRecipeText() {
+      if (!currentModalRecipe) return;
+      const r = currentModalRecipe;
+      const lines = [
+        `📌 ${r.name.toUpperCase()} (${r.category}${r.size ? ' - ' + r.size : ''})`,
+        `\n🔸 NGUYÊN LIỆU & ĐỊNH LƯỢNG:`,
+        ...r.ingredients.map(i => `- ${i.item}: ${i.amount}`),
+        `\n🔸 CÁCH LÀM:`,
+        ...r.steps.map((s, idx) => `${idx + 1}. ${s}`)
+      ];
+      if (r.decor) lines.push(`\n✨ DECOR: ${r.decor}`);
+      if (r.notes && r.notes.length > 0) {
+        lines.push(`\n⚠️ LƯU Ý:`);
+        r.notes.forEach(n => lines.push(`- ${n}`));
+      }
+
+      const textToCopy = lines.join("\n");
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = textToCopy;
+      tempTextArea.style.position = "fixed";
+      tempTextArea.style.left = "-9999px";
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      
+      try {
+        document.execCommand("copy");
+        const toast = document.getElementById("copyToast");
+        toast.classList.remove("opacity-0");
+        setTimeout(() => toast.classList.add("opacity-0"), 2500);
+      } catch (err) {
+        console.error("Không thể sao chép:", err);
+      } finally {
+        document.body.removeChild(tempTextArea);
+      }
+    }
+
+    // =========================================================================
+    // 7. KHỞI TẠO SỰ KIỆN KHI TẢI TRANG
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      renderCategoryTabs();
+      renderRecipes();
+
+      const searchInput = document.getElementById("searchInput");
+      const clearBtn = document.getElementById("clearSearchBtn");
+
+      searchInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value;
+        if (searchQuery.length > 0) {
+          clearBtn.classList.remove("hidden");
+        } else {
+          clearBtn.classList.add("hidden");
+        }
+        renderRecipes();
+      });
+
+      // Phím tắt tiện lợi cho nhân viên quầy bar: "/" để tìm kiếm, "Escape" để đóng modal
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !document.getElementById("recipeModal").classList.contains("hidden")) {
+          closeModal();
+        } else if (e.key === "/" && document.activeElement !== searchInput && document.getElementById("recipeModal").classList.contains("hidden")) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
